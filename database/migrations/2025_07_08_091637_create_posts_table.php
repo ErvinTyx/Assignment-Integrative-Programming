@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('image')->nullable();
-            $table->string('tittle');
+            $table->string('title');
             $table->string('slug')->unique();
             $table->longText('content');
             $table->foreignId('category_id')->constrained()->onDelete('cascade');// constrained means if category is does not exists then it would not create, onDelete means if category deleted all of its post will be deleted
