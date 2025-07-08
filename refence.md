@@ -18,6 +18,8 @@ is to run the database migration (aka save or commit)
 `php artisan migrate:rollback --step=<n>`
 is to undo the changes to the database that save, n means the number times to revert 
 
+To generate seed data to database we can run 
+`php artisan migrate --seed` or we can run `php artisan db:seed`
 
 `php artisan tinker`
 interact with the database
