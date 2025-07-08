@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Category;
+use App\Models\Post;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,11 +14,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $categories = [
+            'Technology',
+            'Health',
+            'Sports',
+            'Politics',
+            'Entertainment',
+        ];
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach ($categories as $category) {
+            Category::create(['name' => $category,]);
+        }
+
+        Post::factory(100)->create();
+
+        // if we wan to add other class seeder we can call by using
+        /*
+        $this->call([PostSeeder::class,]);
+        */
     }
 }
