@@ -12,6 +12,14 @@ is to make the blueprints for the database and make factory
 if make the blueprints but dont have model 
 `php artisan make:factory <name_of_model>Factory`
 
+To make a controller empty class
+`php artisan make:controller PostController`
+with resource 
+`php artisan make:controller PostController --resource`
+
+with specific instance of a class in model
+`php artisan make:controller PostController --resource --model=<model_name>`
+
 `php artisan migrate`
 is to run the database migration (aka save or commit)
 
