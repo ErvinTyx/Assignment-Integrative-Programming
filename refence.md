@@ -15,12 +15,18 @@ if make the blueprints but dont have model
 `php artisan migrate`
 is to run the database migration (aka save or commit)
 
+`php artisan migrate:fresh --seed`
+is to drop every table and reapply every migrations and seeding
+
 `php artisan migrate:rollback --step=<n>`
 is to undo the changes to the database that save, n means the number times to revert 
 
 #### To make seeder
 To seed the database with records
 `php artisan migrate --seed` or we can run `php artisan db:seed`
+
+To seed a specific file 
+`php artisan db:seed --class=PostSeeder`
 
 we can create a new seeder class by using
 `php artisan make:seeder <class_name>`
