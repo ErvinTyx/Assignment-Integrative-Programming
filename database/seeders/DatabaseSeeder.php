@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         User::factory()->create([
             "name"=> "Test User Doe",
-            "email"=> "test6@gmail.com",
+            "email"=> "test@gmail.com",
         ]);
 
         $categories = [
