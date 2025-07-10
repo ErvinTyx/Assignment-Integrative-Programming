@@ -20,6 +20,12 @@ with resource
 with specific instance of a class in model
 `php artisan make:controller PostController --resource --model=<model_name>`
 
+to create a component with class and view
+`php artisan make:compoenet <Component_name>`
+
+to create a component for view only
+`php artisan make:compoenet <Component_name> --view`
+
 `php artisan migrate`
 is to run the database migration (aka save or commit)
 
@@ -39,7 +45,8 @@ To seed a specific file
 we can create a new seeder class by using
 `php artisan make:seeder <class_name>`
 
-
+To install certain layout from a publish
+`php artisan vendor:publish --tag=laravel-pagination`
 
 `php artisan tinker`
 interact with the database
