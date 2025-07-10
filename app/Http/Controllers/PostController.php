@@ -15,7 +15,11 @@ class PostController extends Controller
     {
         //
         $categories = Category::get();
-        return view('dashboard', ["categories"=> $categories]);
+        $posts = Post::orderBy('created_at','DESC')->simplePaginate(5);
+        return view('dashboard', [
+            "categories"=> $categories,
+            "posts"=> $posts,
+        ]);
     }
 
     /**
