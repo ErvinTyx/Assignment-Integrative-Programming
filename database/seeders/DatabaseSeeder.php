@@ -32,11 +32,12 @@ class DatabaseSeeder extends Seeder
             Category::create(['name' => $category,]);
         }
 
-        Post::factory(100)->create();
+        // Post::factory(100)->create();
 
         // if we wan to add other class seeder we can call by using
         /*
         $this->call([PostSeeder::class,]);
         */
+        loru
     }
 }

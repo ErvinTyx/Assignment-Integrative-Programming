@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -13,9 +15,9 @@ class PostController extends Controller
     public function index()
     {
         //
-        $posts = Post::orderBy('created_at','DESC')->simplePaginate(5);
+        $posts = Post::orderBy('created_at', 'DESC')->simplePaginate(5);
         return view('post.index', [
-            "posts"=> $posts,
+            "posts" => $posts,
         ]);
     }
 
@@ -25,7 +27,33 @@ class PostController extends Controller
     public function create()
     {
         //
-        
+        $categories = Category::get();
+        return view(
+            'post.create',
+            [
+                'categories' => $categories,
+            ]
+        );
+
+    }
+    /**
+     * Generate a unique slug for the post title.
+     *
+     * @param string $title
+     * @return string
+     */
+    private function generateUniqueSlug($title)
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (Post::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
     }
 
     /**
@@ -33,8 +61,30 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+
+        $data = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'title' => 'required',
+            'content' => 'required',
+            'category_id' => ['required', 'exists:categories,id'],
+            'published_at' => ['nullable', 'date'],
+        ]);
+        $image = $data['image'];
+        unset($data['image']);
+        $data['user_id'] = auth()->id();// or auth()->user()->id; or Auth::id();
+        $data['slug'] = $this->generateUniqueSlug($data['title']);
+        $imagePath = $image->store('posts', 'public');
+        $data['image'] = $imagePath;
+
+
+
+        Post::create($data);
+
+        return redirect()->route('dashboard');
         //
     }
+
+    
 
     /**
      * Display the specified resource.
