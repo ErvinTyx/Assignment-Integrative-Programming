@@ -8,6 +8,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/@{user:username}', [\App\Http\Controllers\PublicProfileControler::class, 'show'])
+->name('profile.show');
+
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -19,6 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/post/create',[PostController::class, 'store'])
     ->name('post.store');
+
+    Route::get('/@{username}/{post:slug}', [PostController::class, 'show'])
+    ->name('post.show');
 });
 
 
