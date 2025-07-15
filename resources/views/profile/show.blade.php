@@ -24,24 +24,27 @@
 
                     </div>
 
-                    <div class=" w-[320px] border-l px-8">
+                    <x-follow-ctr :user="$user" class="w-[320px] border-l px-8">
                         <x-user-avatar :user="$user" size="w-16 h-16" />
                         <h3>
                             {{ $user->name }}
                         </h3>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">
-                            26k Followers
+                            <span x-text="followersCount"></span> Followers
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">
                             {{ $user->bio ?? 'The person is too lazy to write bio' }}
                         </p>
-                        <div>
-                            <button
-                                class="bg-emerald-600 px-4 py-2 text-white rounded-full hover:bg-blue-600 transition-colors">
-                                Follow
-                            </button>
-                        </div>
-                    </div>
+                        @if (auth()->user() && auth()->user()->id !== $user->id)
+                            <div class ="mt-4">
+                                <button @click="follow()" class=" px-4 py-2 text-white rounded-full  transition-colors"
+                                    x-text="following ? 'Unfollow' : 'Follow'"
+                                    :class="following ? 'bg-red-600 hover:bg-orange-600' : 'bg-emerald-600 hover:bg-blue-600'">
+
+                                </button>
+                            </div>
+                        @endif
+                    </x-follow-ctr>
                 </div>
             </div>
         </div>

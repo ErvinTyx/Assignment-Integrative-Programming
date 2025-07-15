@@ -11,14 +11,14 @@
                     <x-user-avatar :user="$post->user" />
 
                     <div>
-                        <div
+                        <x-follow-ctr :user="$post->user"
                             class="flex gap-2 text-sm text-gray-500 dark:text-gray-400 text-xl font-semibold text-gray-900 dark:text-white">
                             <a class="hover:underline" href="{{ route('profile.show',$post->user) }}">{{ $post->user->name }}</a>
                             &middot;
-                            <a href="" class="text-emerald-500 hover:underline">
-                                Follow
-                            </a>
-                        </div>
+                            <button @click="follow()" x-text="following ? 'Unfollow' : 'Follow'" :class="following ? 'text-red-500 hover:underline' : 'text-emerald-500 hover:underline'">
+                            
+                            </button>
+                        </x-follow-ctr>
                         <div class="flex gap-2 text-gray-500 dark:text-gray-400">
                             {{ $post->readTime() }}
                             &middot;
