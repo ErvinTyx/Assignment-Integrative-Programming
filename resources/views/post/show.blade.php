@@ -47,7 +47,7 @@
 
                     </span>
                 </div>
-                <x-clap-button />
+                <x-clap-button :post="$post"/>
 
             </div>
         </div>

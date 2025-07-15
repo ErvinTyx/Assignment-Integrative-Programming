@@ -27,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('post.show');
 
     Route::post('/follow/{user:id}', [\App\Http\Controllers\FollowerController::class, 'followUnfollow'])->name('follow');
+
+    Route::post('/clap/{post}', [\App\Http\Controllers\ClapController::class, 'clap'])
+    ->name('clap');
 });
 
 
