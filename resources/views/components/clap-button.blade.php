@@ -1,6 +1,8 @@
 @props(['post'])
 
 
+@auth
+    
 
 {{-- Clap Section --}}
 <div x-data="{
@@ -38,3 +40,4 @@
         <span x-text="count"></span>
     </button>
 </div>
+@endauth
