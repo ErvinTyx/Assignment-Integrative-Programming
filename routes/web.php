@@ -11,11 +11,14 @@ Route::get('/', function () {
 Route::get('/@{user:username}', [\App\Http\Controllers\PublicProfileControler::class, 'show'])
 ->name('profile.show');
 
+Route::get('/', [PostController::class, 'index'])
+->name('dashboard');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', [PostController::class, 'index'])
-    ->name('dashboard');
+
+    Route::get('/category/{category}', [PostController::class, 'category'])
+    ->name('post.byCategory');
 
     Route::get('/posts/create', [PostController::class, 'create'])
     ->name('post.create');

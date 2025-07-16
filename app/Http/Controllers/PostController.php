@@ -79,12 +79,12 @@ class PostController extends Controller
         //
     }
 
-    
+
 
     /**
      * Display the specified resource.
      */
-    public function show(string $username,Post $post)
+    public function show(string $username, Post $post)
     {
         //
         return view('post.show', [
@@ -114,5 +114,13 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         //
+    }
+
+    public function category(Category $category)
+    {
+        $posts = $category->posts()->latest()->simplePaginate(5);
+        return view('post.index', [
+            'posts' => $posts,
+        ]);
     }
 }
