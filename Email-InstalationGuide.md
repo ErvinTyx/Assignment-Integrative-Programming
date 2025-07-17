@@ -18,3 +18,11 @@ MAIL_MAILER=smtp
 # the receiving port
 MAIL_PORT=1025
 ```
+
+
+# spatie media library
+`composer require "spatie/laravel-medialibrary"`
+
+
+to prepare the database
+`php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="medialibrary-migrations"`
