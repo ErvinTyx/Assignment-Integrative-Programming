@@ -15,10 +15,10 @@ Route::get('/', [PostController::class, 'index'])
     ->name('dashboard');
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::get('/category/{category}', [PostController::class, 'category'])
+    ->name('post.byCategory');
 
-    Route::get('/category/{category}', [PostController::class, 'category'])
-        ->name('post.byCategory');
+Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/posts/create', [PostController::class, 'create'])
         ->name('post.create');

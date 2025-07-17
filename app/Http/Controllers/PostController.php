@@ -23,6 +23,7 @@ class PostController extends Controller
 
         $query = Post::
             with(['user', 'media'])->
+            where('published_at', '<=', now())->
             withCount('claps')->
             latest();
         if ($user) {
@@ -119,7 +120,7 @@ class PostController extends Controller
         $categories = Category::get();
         return view('post.edit', [
             'post' => $post,
-            'categories'=> $categories,
+            'categories' => $categories,
         ]);
     }
 
@@ -128,16 +129,16 @@ class PostController extends Controller
      */
     public function update(PostUpdateRequest $request, Post $post)
     {
-        if($post->user_id !== Auth()->user()->id) {
+        if ($post->user_id !== Auth()->user()->id) {
             abort(403);
 
             $data = $request->validated();
 
             $post->update($data);
 
-            if ($data['image']?? false){
+            if ($data['image'] ?? false) {
                 $post->addMediaFromRequest('image')
-                ->toMediaCollection();
+                    ->toMediaCollection();
             }
 
             return redirect()->route('myPosts');
@@ -173,10 +174,20 @@ class PostController extends Controller
 
     public function category(Category $category)
     {
-        $posts = $category->posts()
+        $user = auth()->user();
+        $query = $category->posts()
             ->with(['user', 'media'])
+            ->where('published_at', '<=', now())
             ->withCount('claps')
-            ->latest()->simplePaginate(5);
+            ->latest();
+
+        if ($user) {
+            $ids = $user->following()->pluck('users.id');
+            $query->whereIn('user_id', $ids);
+        }
+
+        $posts = $query->simplePaginate(5);
+
         return view('post.index', [
             'posts' => $posts,
         ]);

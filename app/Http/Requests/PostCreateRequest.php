@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PostCreateRequest extends FormRequest
 {
@@ -26,7 +27,7 @@ class PostCreateRequest extends FormRequest
             'title' => 'required',
             'content' => 'required',
             'category_id' => ['required', 'exists:categories,id'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['required', 'date', Rule::date()->afterOrEqual(today())],
         ];
     }
 }
