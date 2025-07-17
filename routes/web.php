@@ -9,30 +9,43 @@ Route::get('/', function () {
 });
 
 Route::get('/@{user:username}', [\App\Http\Controllers\PublicProfileControler::class, 'show'])
-->name('profile.show');
+    ->name('profile.show');
 
 Route::get('/', [PostController::class, 'index'])
-->name('dashboard');
+    ->name('dashboard');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/category/{category}', [PostController::class, 'category'])
-    ->name('post.byCategory');
+        ->name('post.byCategory');
 
     Route::get('/posts/create', [PostController::class, 'create'])
-    ->name('post.create');
+        ->name('post.create');
 
-    Route::post('/post/create',[PostController::class, 'store'])
-    ->name('post.store');
+
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])
+        ->name('post.destroy');
+
+    Route::get('/my-posts', [PostController::class, 'myPosts'])
+        ->name('myPosts');
+
+    Route::get('/posts/{post:slug}', [PostController::class, 'edit'])
+        ->name('post.edit');
+
+    Route::put('/posts/{post}', [PostController::class, 'update'])
+        ->name('post.update');
+
+    Route::post('/post/create', [PostController::class, 'store'])
+        ->name('post.store');
 
     Route::get('/@{username}/{post:slug}', [PostController::class, 'show'])
-    ->name('post.show');
+        ->name('post.show');
 
     Route::post('/follow/{user:id}', [\App\Http\Controllers\FollowerController::class, 'followUnfollow'])->name('follow');
 
     Route::post('/clap/{post}', [\App\Http\Controllers\ClapController::class, 'clap'])
-    ->name('clap');
+        ->name('clap');
 });
 
 

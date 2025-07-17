@@ -42,6 +42,10 @@
                                     {{ __('Profile') }}
                                 </x-dropdown-link>
 
+                                <x-dropdown-link :href="route('myPosts')">
+                                    {{ __('My Posts') }}
+                                </x-dropdown-link>
+
                                 <!-- Authentication -->
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -63,7 +67,7 @@
                             Create an Account
                         </x-primary-button>
                     </a>
-                    <a href="route('login')" class="flex items-center pl-4">
+                    <a href="{{ route('login') }}" class="flex items-center pl-4">
                         <x-primary-button>
                             Log in
                         </x-primary-button>
@@ -102,6 +106,10 @@
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('myPosts')">
+                        {{ __('My Posts') }}
                     </x-responsive-nav-link>
 
                     <!-- Authentication -->

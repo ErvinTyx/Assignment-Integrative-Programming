@@ -8,11 +8,14 @@ use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class Post extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use HasSlug;
     //
     protected $fillable = [
         // 'image',
@@ -34,9 +37,22 @@ class Post extends Model implements HasMedia
             ->width(1200);
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('default')
+            ->singleFile();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
     }
 
     public function category()
@@ -56,8 +72,16 @@ class Post extends Model implements HasMedia
         return $readTime . ' min read';
     }
 
-    public function imageUrl($conversionName ='')
+    public function imageUrl($conversionName = '')
     {
-        return $this->getFirstMedia()?->getUrl($conversionName ? 'preview' : 'large');
+        $media = $this->getFirstMedia();
+        if (!$media) {
+            return null;
+        }
+        if ($media->hasGeneratedConversion($conversionName)) {
+            return $media->getUrl($conversionName);
+        }
+
+        return $media->getUrl();
     }
 }
