@@ -9,7 +9,6 @@
     "devDependencies": {
         "@headlessui/react": "^2.0.0",
         "@inertiajs/react": "^2.0.0",
-        "@tailwindcss/forms": "^0.5.3",
         "@tailwindcss/vite": "^4.0.0",
         "@types/node": "^20.19.0",
         "@types/react": "^18.0.28",
@@ -30,6 +29,7 @@
         "@types/babel__generator": "^7.27.0",
         "@types/babel__template": "^7.4.4",
         "@types/babel__traverse": "^7.28.0",
-        "@types/prop-types": "^15.7.15"
+        "@types/prop-types": "^15.7.15",
+        "daisyui": "^5.0.50"
     }
 }
