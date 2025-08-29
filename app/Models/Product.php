@@ -32,8 +32,13 @@ class Product extends Model implements HasMedia
         
     }
 
-    public function variationType()
+    public function variationTypes()
     {
         return $this->hasMany(VariationType::class);
+    }
+
+    public function variations()
+    {
+        return $this->hasMany(ProductVariation::class, 'product_id');
     }
 }
