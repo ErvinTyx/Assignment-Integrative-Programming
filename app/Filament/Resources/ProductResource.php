@@ -8,9 +8,7 @@ use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use App\Filament\Resources\ProductResource\Pages\ProductImages;
 use App\Filament\Resources\ProductResource\Pages\ProductVariation;
 use App\Filament\Resources\ProductResource\Pages\ProductVariationTypes;
-use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
-use Filament\Forms;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -24,7 +22,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class ProductResource extends Resource
@@ -34,6 +31,11 @@ class ProductResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-c-queue-list';
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::End;
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->forVendor();
+    }
 
     public static function form(Form $form): Form
     {
@@ -130,7 +132,7 @@ class ProductResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('status')
-                ->options(ProductStatusEnum::labels()),
+                    ->options(ProductStatusEnum::labels()),
                 SelectFilter::make('department_id')
                     ->relationship('department', 'name'),
             ])
@@ -147,12 +149,11 @@ class ProductResource extends Resource
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
-                EditProduct::class,
-                ProductImages::class,
-                ProductVariationTypes::class,
-                ProductVariation::class
-            ]);
-        
+            EditProduct::class,
+            ProductImages::class,
+            ProductVariationTypes::class,
+            ProductVariation::class
+        ]);
     }
 
     public static function getRelations(): array
