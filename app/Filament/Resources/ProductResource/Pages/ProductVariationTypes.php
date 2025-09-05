@@ -24,7 +24,7 @@ class ProductVariationTypes extends EditRecord
     {
         return $form
             ->schema([
-                Repeater::make("variationType")
+                Repeater::make("variationTypes")
                     ->label(false)
                     ->relationship()
                     ->collapsible()

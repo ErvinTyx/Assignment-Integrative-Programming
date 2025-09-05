@@ -30,6 +30,7 @@ class ProductImages extends EditRecord
                     ->appendFiles()
                     ->preserveFilenames()
                     ->columnSpan(2)
+                    ->conversion('thumb')
             ]);
     }
 

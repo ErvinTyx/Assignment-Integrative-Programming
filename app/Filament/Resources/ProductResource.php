@@ -46,7 +46,11 @@ class ProductResource extends Resource
                     ->required()
                     ->afterStateUpdated(
                         function (string $operation, $state, callable $set): void {
-                            $set('slug', Str::slug($state));
+                            $slug = Str::slug($state);
+                            if (static::getEloquentQuery()->where('slug', $slug)->exists()) {
+                                $slug .= '-' . Str::random(4);
+                            }
+                            $set('slug', $slug);
                         }
                     ),
                 TextInput::make('slug')
