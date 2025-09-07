@@ -27,7 +27,7 @@ function MiniCartDropDown() {
                         {
                             miniCartItems.map((item) => (
                                 <div key={item.id} className={"flex gap-4 p-3"}>
-                                    <Link href={route(productRoute(item))}>
+                                    <Link href={route('product.show', item.slug)}>
                                         <img
                                             src={item.image}
                                             alt={item.title}
@@ -35,7 +35,7 @@ function MiniCartDropDown() {
                                     </Link>
                                     <div className={"flex-1"}>
                                         <h3 className="mb-3 font-semibold">
-                                            <Link href={route(productRoute(item))}>
+                                            <Link href={route("product.show", item.slug)}>
                                                 {item.title}
                                             </Link>
                                         </h3>
