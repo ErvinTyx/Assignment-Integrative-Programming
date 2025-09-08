@@ -75,11 +75,28 @@ class Product extends Model implements HasMedia
         foreach ($this->variations as $variation) {
             $a = $variation->variation_type_option_ids;
             sort($a);
-            if($optionIds == $a) {
-                return $variation->price !==null ? $variation->price : $this->price;
+            if ($optionIds == $a) {
+                return $variation->price !== null ? $variation->price : $this->price;
             }
         }
 
         return $this->price;
+    }
+
+    public function getImageForOptions(array $optionIds = null) {
+        if ($optionIds) {
+            $optionIds = array_values($optionIds);
+            sort($optionIds);
+
+            $options = VariationTypeOption::whereIn('id', $optionIds)->get();
+
+            foreach ($options as $option) {
+                $image = $option->getFirstMediaUrl('images', 'small');
+                if ($image) {
+                    return $image;
+                }
+            }
+        }
+        return $this->getFirstMediaUrl('images', 'small');
     }
 }

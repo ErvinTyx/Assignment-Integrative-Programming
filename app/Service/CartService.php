@@ -264,25 +264,26 @@ class CartService
     }
 
     protected function getCartItemsFromDatabase()
-    {
-        $userId = Auth::id();
+{
+    $userId = Auth::id();
+    
+    $cartItems = CartItem::where('user_id', $userId)
+        ->get()
+        ->map(function ($cartItem) {
+            $optionIds = is_string($cartItem->variation_type_option_ids) ? json_decode($cartItem->variation_type_option_ids, true) : [];
+            return [
+                "id" => $cartItem->id,
+                "product_id" => $cartItem->product_id,
+                "quantity" => $cartItem->quantity,
+                "price" => $cartItem->price,
+                "option_ids" =>  $optionIds ?? [],
+            ];
+        })
+        ->toArray();
 
-        $cartItems = CartItem::where('user_id', $userId)
-            ->get()
-            ->map(function ($cartItem) {
-                return [
-                    "id" => $cartItem->id,
-                    "product_id" => $cartItem->product_id,
-                    "quantity" => $cartItem->quantity,
-                    "price" => $cartItem->price,
-                    "option_ids" => $cartItem->variation_type_option_ids,
-                ];
-            })
-            ->toArray();
+    return $cartItems;
+}
 
-        return $cartItems;
-
-    }
 
     protected function getCartItemsFromCookies()
     {
