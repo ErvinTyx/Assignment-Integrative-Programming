@@ -50,7 +50,7 @@ class CartController extends Controller
             $data['option_ids'] ?: [],
         );
 
-        return back()->with('status', 'Product added to cart successfully!');
+        return back()->with('success', 'Product added to cart successfully!');
     }
 
 

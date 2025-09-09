@@ -96,11 +96,16 @@
 }
 
 .wysiwyg-output a {
-    text-decoration: #4b9afa;
+    text-decoration: underline;
+    text-decoration-color: #4b9afa;
     color: blue;
 }
 
 .wysiwyg-output a.hashtag {
     background-color: #eaf4ff;
     color: #4156e2;
+}
+
+.logo {
+    height: 75px;
 }
