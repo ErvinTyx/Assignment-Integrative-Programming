@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
+use App\Enums\VendorStatusEnum;
 use App\Http\Controllers\ProductController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -43,13 +44,18 @@ class Product extends Model implements HasMedia
 
     public function scopeForWebsite(Builder $query): Builder
     {
-        return $query->published();
+        return $query->published()->VendorApproved();
+    }
+
+    public function scopeVendorApproved(Builder $query)
+    {
+        return $query->join('vendors', 'vendors.user_id', '=', 'products.created_by')->where('vendors.status', VendorStatusEnum::Approved->value);
     }
 
 
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('status', ProductStatusEnum::Published);
+        return $query->where('products.status', ProductStatusEnum::Published);
     }
 
     public function user()
@@ -83,7 +89,8 @@ class Product extends Model implements HasMedia
         return $this->price;
     }
 
-    public function getImageForOptions(array $optionIds = null) {
+    public function getImageForOptions(array $optionIds = null)
+    {
         if ($optionIds) {
             $optionIds = array_values($optionIds);
             sort($optionIds);
@@ -99,4 +106,62 @@ class Product extends Model implements HasMedia
         }
         return $this->getFirstMediaUrl('images', 'small');
     }
+
+    public function options()
+    {
+        return $this->hasManyThrough(
+            VariationTypeOption::class,
+            VariationType::class,
+            'product_id',
+            "variation_type_id",
+            "id",
+            "id"
+        );
+    }
+
+    public function getPriceForFirstOptions()
+    {
+        $firstOptions = $this->getFirstOptionsMap();
+
+        if ($firstOptions) {
+            return $this->getPriceForOptions($firstOptions);
+
+        }
+        return $this->price;
+    }
+
+    public function getImages()
+    {
+        if ($this->options()->count() > 0) {
+            foreach ($this->options as $option) {
+                $images = $option->getMedia('images');
+                if ($images) {
+                    return $images;
+                }
+            }
+        }
+        return $this->getMedia('images');
+    }
+
+
+    public function getFirstImageUrl($collection = 'images', $conversion = 'small')
+    {
+        if ($this->options->count() > 0) {
+            foreach ($this->options as $option) {
+                $image = $option->getFirstMediaUrl($collection, $conversion);
+                if ($image) {
+                    return $image;
+                }
+            }
+        }
+        return $this->getFirstMediaUrl($collection, $conversion);
+    }
+
+    public function getFirstOptionsMap(): array
+    {
+        return $this->variationTypes
+            ->mapWithKeys(fn($type) => [$type->id => $type->options->first()?->id])
+            ->toArray();
+    }
+
 }
