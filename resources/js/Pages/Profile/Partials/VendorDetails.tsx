@@ -51,7 +51,7 @@ export default function VendorDetails(
     const updateVendor: FormEventHandler = (ev) => {
         ev.preventDefault();
 
-        post(route('vendor.update'), {
+        post(route('vendor.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 closeModal();

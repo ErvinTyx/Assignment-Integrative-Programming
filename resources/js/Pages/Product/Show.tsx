@@ -3,7 +3,7 @@ import CurrencyFormatter from "@/Components/CurrencyFormatter";
 import { arraysAreEqual } from "@/helpers";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Product, VariationTypeOption } from "@/types";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useMemo, useState } from "react";
 import { render } from "react-dom";
 
@@ -115,7 +115,7 @@ function Show({ product, variationOptions }:
 
     const renderProductVariationTypes = () => {
         return (
-            product.variationTypes.map((type,i) => (
+            product.variationTypes.map((type, i) => (
                 <div key={type.id}>
                     <b>{type.name}</b>
                     {type.type === 'Image' &&
@@ -178,13 +178,17 @@ function Show({ product, variationOptions }:
                         <Carousel images={images ?? []} />
                     </div>
                     <div className="col-span-5">
-                        <h1 className="text-2xl mb-8">{product.title}</h1>
+                        <h1 className="text-2xl">{product.title}</h1>
+                        <p className={" mb-8"}>
+                            by <Link href={route('vendor.profile', product.user.store_name)} className="hover:underline">{product.user.store_name}</Link>&nbsp;
+                            in <Link href="/" className="hover:underline">{product.department.name}</Link>
+                        </p>
                         <div>
                             <div className="text-3xl font-semibold">
                                 <CurrencyFormatter amount={computedProduct.price} />
                             </div>
                         </div>
-                        
+
                         {renderProductVariationTypes()}
 
                         {computedProduct.quantity != undefined && computedProduct.quantity < 10 &&
