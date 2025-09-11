@@ -8,11 +8,16 @@ use App\Mail\CheckoutCompleted;
 use App\Mail\NewOrderMail;
 use App\Models\CartItem;
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
+use Stripe\Account;
+use Stripe\AccountLink;
+use Stripe\Stripe;
 use Stripe\StripeClient;
+use Stripe\Transfer;
 use Stripe\Webhook;
 
 class StripeController extends Controller
@@ -176,6 +181,79 @@ class StripeController extends Controller
                 echo 'Received unknown event type ' . $event->type;
         }
         return response('', 200);
+    }
+
+
+    /**
+     * Create or redirect vendor to Express Connect onboarding
+     */
+    public function connect(): RedirectResponse
+    {
+        $vendor = auth()->user()->vendor;
+
+        Stripe::setApiKey(config('app.stripe_secret'));
+
+        if (!$vendor->stripe_account_id) {
+            $account = Account::create([
+                'type' => 'express',
+                'country' => 'MY',
+                'email' => auth()->user()->email,
+                'capabilities' => [
+                    'card_payments' => ['requested' => true],
+                    'transfers' => ['requested' => true],
+                ],
+            ]);
+
+            $vendor->update([
+                'stripe_account_id' => $account->id,
+            ]);
+        }
+
+        $accountId = $vendor->stripe_account_id;
+
+        $accountLink = AccountLink::create([
+            'account' => $accountId,
+            'refresh_url' => route('stripe.onboarding.refresh'),
+            'return_url' => route('stripe.onboarding.return'),
+            'type' => 'account_onboarding',
+        ]);
+
+        return redirect($accountLink->url);
+    }
+
+    /**
+     * Handle return from onboarding
+     */
+    public function onboardingReturn()
+    {
+        $vendor = auth()->user()->vendor;
+
+        Stripe::setApiKey(config('app.stripe_secret'));
+        $account = Account::retrieve($vendor->stripe_account_id);
+
+        if ($account->details_submitted) {
+            $vendor->update(['stripe_account_active' => true]);
+        }
+
+        return redirect()->route('profile.edit')->with('success', 'Stripe onboarding completed!');
+    }
+
+    /**
+     * Example: payout to vendor account
+     */
+    public function payout($vendorId)
+    {
+        $vendor = \App\Models\Vendor::findOrFail($vendorId);
+
+        Stripe::setApiKey(config('app.stripe_secret'));
+
+        $transfer = Transfer::create([
+            'amount' => 10000, // RM100.00 (amount in cents)
+            'currency' => 'myr',
+            'destination' => $vendor->stripe_account_id,
+        ]);
+
+        return response()->json($transfer);
     }
 
 }
