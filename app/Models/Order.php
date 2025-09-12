@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\OrderStatusEnum;
 use App\States\{DraftState, PaidState, ShippedState, DeliveredState, CancelledState, OrderStateInterface};
@@ -20,6 +21,11 @@ class Order extends Model
         'vendor_subtotal',
         'payment_intent',
     ];
+
+    public function scopeForVendor(Builder $query): Builder
+    {
+        return $query->where('vendor_user_id', auth()->user()->id);
+    }
 
     public function orderItems()
     {

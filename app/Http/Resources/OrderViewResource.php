@@ -47,7 +47,7 @@ class OrderViewResource extends JsonResource
             "orderItems" => $this->orderItems->map(fn($item) => [
                 "id" => $item->id,
                 "quantity" => $item->quantity,
-                "price" => $item->total_price,
+                "price" => $item->price,
                 "variation_type_option_ids" => $item->variation_type_option_ids,
                 "product" => [
                     "id" => $item->product->id,

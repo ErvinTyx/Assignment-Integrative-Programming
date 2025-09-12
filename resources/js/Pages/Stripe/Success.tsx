@@ -64,9 +64,20 @@ function Success({ orders }: PageProps<{ orders: Order[] }>) {
                             </div>
                         </div>
                         <div className="flex justify-between mt-4">
-                            <Link href="#" className="btn btn-primary">View Order Details</Link>
-                            <Link href={route('dashboard')} className="btn">Continue Shopping</Link>
+                            <Link
+                                href={route('orders.show', order.id)}
+                                className="btn btn-primary"
+                            >
+                                View Order Details
+                            </Link>
+                            <Link
+                                href={route('dashboard')}
+                                className="btn"
+                            >
+                                Continue Shopping
+                            </Link>
                         </div>
+
                     </div>
                 ))}
             </div>

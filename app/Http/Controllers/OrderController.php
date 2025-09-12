@@ -1,5 +1,6 @@
 <?php
 
+
 // app/Http/Controllers/OrderController.php
 
 namespace App\Http\Controllers;
@@ -37,8 +38,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        return Inertia::render("Order/Show", [
-            'order' => new OrderViewResource($order),
+        return inertia('Orders/Show', [
+            'order' => (new OrderViewResource($order))->toArray(request()),
         ]);
     }
 
