@@ -39,6 +39,7 @@ class OrderResource extends Resource
                         ->options([
                             'draft' => 'Draft',
                             'paid' => 'Paid',
+                            'failed' => 'Failed',
                             'shipped' => 'Shipped',
                             'delivered' => 'Delivered',
                             'cancelled' => 'Cancelled',
@@ -108,6 +109,7 @@ class OrderResource extends Resource
                     ->options([
                         'draft' => 'Draft',
                         'paid' => 'Paid',
+                        'failed' => 'Failed',
                         'shipped' => 'Shipped',
                         'delivered' => 'Delivered',
                         'cancelled' => 'Cancelled',
