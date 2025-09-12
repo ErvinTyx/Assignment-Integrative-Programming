@@ -31,6 +31,7 @@
         "@types/babel__template": "^7.4.4",
         "@types/babel__traverse": "^7.28.0",
         "@types/prop-types": "^15.7.15",
-        "daisyui": "^5.0.50"
+        "daisyui": "^5.0.50",
+        "ziggy-js": "^2.5.3"
     }
 }

@@ -16,6 +16,6 @@ class CancelledState implements OrderStateInterface
 
     public function cancel(Order $order): void
     {
-         // Already cancelled, do nothing
+         throw new Exception("Order was cancelled.");
     }
 }

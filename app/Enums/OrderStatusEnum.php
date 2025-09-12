@@ -6,7 +6,6 @@ enum OrderStatusEnum: string
 {
     case Draft = "draft";
     case Paid = "paid";
-
     case Failed = "failed";
     case Shipped = "shipped";
     case Delivered = "delivered";
