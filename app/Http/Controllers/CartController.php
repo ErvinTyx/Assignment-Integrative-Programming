@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
+use Illuminate\Support\Facades\Http;
 
 class CartController extends Controller
 {
@@ -110,25 +111,84 @@ class CartController extends Controller
                 $user = $item['user'];
                 $cartItems = $item['items'];
 
-                $order = Order::create([
-                    'stripe_session_id' => null,
-                    'user_id' => $request->user()->id,
-                    'vendor_user_id' => $user['id'],
-                    'total_price' => $item['totalPrice'],
-                    'status' => OrderStatusEnum::Draft->value,
-                ]);
+                try {
+                        // Auto-detect: if request has 'use_api' query param, consume externally
+                        $useApi = $request->query('use_api', false);
+
+                        if ($useApi) {
+                            // External API consumption (Order Module REST API)
+                            $response = Http::timeout(10)->post(route('api.orders.store'), [
+                                'stripe_session_id' => null,
+                                'user_id'           => $request->user()->id,
+                                'vendor_user_id'    => $user['id'],
+                                'total_price'       => $item['totalPrice'],
+                                'status'            => OrderStatusEnum::Draft->value,
+                            ]);
+
+                            if ($response->failed()) {
+                                throw new \Exception('Failed to create order via API');
+                            }
+
+                            $order = $response->json(); // API response (JSON object/array)
+
+                        } else {
+                            // Internal DB call (same module, no API)
+                            $order = Order::create([
+                                'stripe_session_id' => null,
+                                'user_id'           => $request->user()->id,
+                                'vendor_user_id'    => $user['id'],
+                                'total_price'       => $item['totalPrice'],
+                                'status'            => OrderStatusEnum::Draft->value,
+                            ]);
+                        }
+
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                    ], 500);
+                }
+
 
                 $orders[] = $order;
 
                 foreach ($cartItems as $cartItem) {
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $cartItem['product_id'],
-                        'quantity' => $cartItem['quantity'],
-                        'price' => $cartItem['price'],
-                        'variation_type_option_ids' => $cartItem['option_ids'],
+                    try {
+                        $useApi = $request->query('use_api', false);
 
-                    ]);
+                        if ($useApi) {
+                            // External API consumption (OrderItem Module REST API)
+                            $response = Http::timeout(10)->post(route('api.order-items.store'), [
+                                'order_id'                  => $order['id'], // careful: $order may be array if API
+                                'product_id'                => $cartItem['product_id'],
+                                'quantity'                  => $cartItem['quantity'],
+                                'price'                     => $cartItem['price'],
+                                'variation_type_option_ids' => $cartItem['option_ids'],
+                            ]);
+
+                            if ($response->failed()) {
+                                throw new \Exception('Failed to create order item via API');
+                            }
+
+                            $orderItem = $response->json();
+
+                        } else {
+                            // Internal DB call (same module)
+                            $orderItem = OrderItem::create([
+                                'order_id'                  => is_array($order) ? $order['id'] : $order->id,
+                                'product_id'                => $cartItem['product_id'],
+                                'quantity'                  => $cartItem['quantity'],
+                                'price'                     => $cartItem['price'],
+                                'variation_type_option_ids' => $cartItem['option_ids'],
+                            ]);
+                        }
+
+                    } catch (\Exception $e) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => $e->getMessage(),
+                        ], 500);
+                    }
 
                     $description = collect($cartItem['options'])->map(function ($item) {
                         return "{$item['type']['name']}: {$item['name']}";

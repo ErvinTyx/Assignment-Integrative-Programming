@@ -43,5 +43,19 @@ class OrderController extends Controller
         ]);
     }
 
-    
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'stripe_session_id' => 'nullable|string',
+            'user_id'           => 'required|integer|exists:users,id',
+            'vendor_user_id'    => 'required|integer|exists:users,id',
+            'total_price'       => 'required|numeric',
+            'status'            => 'nullable|string',
+        ]);
+
+        $order = Order::create($data);
+
+        return response()->json($order, 201);
+    }
+
 }

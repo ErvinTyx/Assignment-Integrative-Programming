@@ -7,9 +7,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\VendorController;
-use App\Http\Controllers\OrderActionController;
+use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
 
+
+Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 // guest routes
 Route::get('/', [ProductController::class, 'home'])
@@ -64,11 +67,15 @@ Route::middleware('auth')->group(function () {
             ->name('stripe.connect')
             ->middleware('role:'.RolesEnum::Vendor->value);
     });
-
-
-Route::get('/order/{id}/proceed', [OrderActionController::class, 'proceed'])->name('order.proceed');
-Route::get('/order/{id}/cancel', [OrderActionController::class, 'cancel'])->name('order.cancel');
-
 });
+
+Route::get('/order/{id}/proceed', [OrderController::class, 'proceed'])->name('order.proceed');
+Route::get('/order/{id}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
+
+// Route::prefix('api')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
+//     ->group(function () {
+//     Route::post('/orders', [OrderController::class, 'store'])->name('api.orders.store');
+//     Route::post('/order-items', [OrderItemController::class, 'store'])->name('api.order-items.store');
+// });
 
 require __DIR__ . '/auth.php';
