@@ -3,18 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
-use Filament\Forms\Components\Select;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Actions;
 
 class OrderResource extends Resource
 {
@@ -26,6 +23,7 @@ class OrderResource extends Resource
     {
         return parent::getEloquentQuery()->forVendor();
     }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -35,15 +33,11 @@ class OrderResource extends Resource
                         ->label('Total Price')
                         ->disabled()
                         ->columnSpan(4),
-                    Select::make('status')
-                        ->options([
-                            'draft' => 'Draft',
-                            'paid' => 'Paid',
-                            'failed' => 'Failed',
-                            'shipped' => 'Shipped',
-                            'delivered' => 'Delivered',
-                            'cancelled' => 'Cancelled',
-                        ])
+
+                    Forms\Components\Placeholder::make('status')
+                        ->label('Current Status')
+                        ->content(fn($record) => ucfirst($record->status->value ?? '—'))
+                        ->columnSpan(4),
                 ]),
 
                 Forms\Components\HasManyRepeater::make('orderItems')
@@ -74,8 +68,6 @@ class OrderResource extends Resource
             ]);
     }
 
-
-
     public static function canDeleteAny(): bool
     {
         return false;
@@ -85,55 +77,52 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->sortable()
-                    ->searchable(),
+                TextColumn::make('id')->sortable()->searchable(),
                 TextColumn::make('total_price')
                     ->numeric()
                     ->formatStateUsing(fn($state) => number_format($state, 2))
                     ->sortable(),
-
                 TextColumn::make('online_payment_commission')
                     ->numeric()
-                    ->formatStateUsing(fn($state) => number_format($state, 2))
-                    ->sortable(),
+                    ->formatStateUsing(fn($state) => number_format($state, 2)),
                 TextColumn::make('website_commission')
                     ->numeric()
-                    ->formatStateUsing(fn($state) => number_format($state, 2))
-                    ->sortable(),
+                    ->formatStateUsing(fn($state) => number_format($state, 2)),
                 TextColumn::make('vendor_subtotal')
                     ->numeric()
-                    ->formatStateUsing(fn($state) => number_format($state, 2))
+                    ->formatStateUsing(fn($state) => number_format($state, 2)),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
                     ->sortable(),
-                SelectColumn::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'paid' => 'Paid',
-                        'failed' => 'Failed',
-                        'shipped' => 'Shipped',
-                        'delivered' => 'Delivered',
-                        'cancelled' => 'Cancelled',
-                    ])->sortable(),
-
-            ])
-            ->filters([
-                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+                Tables\Actions\Action::make('cancel')
+                ->label('Cancel')
+                ->icon('heroicon-o-x-circle')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->visible(fn($record) => $record->status->value !== 'cancelled')
+                ->action(function ($record) {
+                    try {
+                        $record->cancel();
+                        $record->save();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Order cancelled successfully')
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        \Filament\Notifications\Notification::make()
+                            ->title('Error')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
+            ]);
+   
     }
 
     public static function getPages(): array

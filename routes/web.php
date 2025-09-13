@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\OrderActionController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -63,6 +64,11 @@ Route::middleware('auth')->group(function () {
             ->name('stripe.connect')
             ->middleware('role:'.RolesEnum::Vendor->value);
     });
+
+
+Route::get('/order/{id}/proceed', [OrderActionController::class, 'proceed'])->name('order.proceed');
+Route::get('/order/{id}/cancel', [OrderActionController::class, 'cancel'])->name('order.cancel');
+
 });
 
 require __DIR__ . '/auth.php';

@@ -66,21 +66,14 @@ class ProductResource extends Resource
                         $set('category_id', null);
                     }),
                 Select::make('category_id')
-                    ->relationship(
-                        name: 'category',
-                        titleAttribute: 'name',
-                        modifyQueryUsing: function (Builder $query, callable $get) {
-
-                            $departmentId = $get('department_id');
-                            if ($departmentId) {
-                                $query->where('department_id', $departmentId);
-                            }
-                        }
-                    )
-                    ->label(__('Categories'))
-                    ->preload()
+                    ->label('Category')
+                    ->options(function (callable $get) {
+                        $departmentId = $get('department_id');
+                        return \App\Models\Category::treeOptions(null, '', $departmentId);
+                    })
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->reactive(),
                 RichEditor::make('description')
                     ->required()
                     ->toolbarButtons([

@@ -43,7 +43,24 @@ class CategorySeeder extends Seeder
                 'active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
+            // [
+            //     'name' => 'Android',
+            //     'department_id' => 1,
+            //     'parent_id' => 4,      // child of Smartphones add for demo it is composite
+            //     'active' => true,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ],
+            // [
+            //     'name' => 'iOS',
+            //     'department_id' => 1,
+            //     'parent_id' => 4,      // child of Smartphones add for demo it is composite
+            //     'active' => true,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ],
+
         ];
 
         \Illuminate\Support\Facades\DB::table('categories')->insert($categories);

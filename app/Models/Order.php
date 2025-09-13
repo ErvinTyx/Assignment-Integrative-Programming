@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\OrderStatusEnum;
+use App\States\{DraftState, PaidState, ShippedState, DeliveredState, CancelledState, OrderStateInterface};
+use Exception;
 
 class Order extends Model
 {
@@ -42,5 +45,34 @@ class Order extends Model
     public function vendor()
     {
         return $this->belongsTo(Vendor::class, 'vendor_user_id', 'user_id');
+    }
+
+    protected $casts = [
+        'status' => OrderStatusEnum::class,
+    ];
+
+
+    public function getState(): OrderStateInterface
+    {
+        return match ($this->status) {
+            OrderStatusEnum::Draft => new DraftState(),
+            OrderStatusEnum::Paid => new PaidState(),
+            OrderStatusEnum::Shipped => new ShippedState(),
+            OrderStatusEnum::Delivered => new DeliveredState(),
+            OrderStatusEnum::Cancelled => new CancelledState(),
+            default => throw new Exception("Unknown order status."),
+        };
+    }
+
+
+    public function proceed(): void
+    {
+        $this->getState()->proceed($this);
+    }
+
+
+    public function cancel(): void
+    {
+        $this->getState()->cancel($this);
     }
 }

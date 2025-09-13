@@ -142,3 +142,27 @@ export type Vendor ={
     store_name: string;
     store_address: string;
 }
+
+export interface OrderView {
+    id: number;
+    status: string;
+    total_price: number;
+    created_at: string;
+    vendorUser: {
+        store_name: string;
+        email: string;
+    };
+    orderItems: {
+        id: number;
+        quantity: number;
+        price: number;
+        variation_type_option_ids: number[];
+        product: {
+            id: number;
+            title: string;
+            slug: string;
+            description: string;
+            image: string;
+        };
+    }[];
+}

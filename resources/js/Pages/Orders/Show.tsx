@@ -1,9 +1,19 @@
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import CurrencyFormatter from "@/Components/CurrencyFormatter";
 import { PageProps, Order } from "@/types";
 
 function Show({ order }: PageProps<{ order: Order }>) {
+    const { post, processing } = useForm();
+
+    const handleProceed = () => {
+        post(route("orders.proceed", order.id));
+    };
+
+    const handleCancel = () => {
+        post(route("orders.cancel", order.id));
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title={`Order #${order.id}`} />
@@ -20,7 +30,7 @@ function Show({ order }: PageProps<{ order: Order }>) {
 
                     <div className="flex justify-between mb-3">
                         <span className="text-gray-400">Status</span>
-                        <span className="font-semibold">{order.status}</span>
+                        <span className="font-semibold capitalize">{order.status}</span>
                     </div>
 
                     <div className="flex justify-between mb-3">
@@ -35,7 +45,9 @@ function Show({ order }: PageProps<{ order: Order }>) {
 
                     <div className="flex justify-between font-bold text-lg">
                         <span>Total</span>
-                        <span><CurrencyFormatter amount={order.total_price} /></span>
+                        <span>
+                            <CurrencyFormatter amount={order.total_price} />
+                        </span>
                     </div>
                 </div>
 
@@ -51,9 +63,7 @@ function Show({ order }: PageProps<{ order: Order }>) {
                                         <span className="font-medium">{item.product?.title ?? "Unknown Product"}</span>
                                         <CurrencyFormatter amount={item.price} />
                                     </div>
-                                    <div className="text-sm text-gray-500">
-                                        Quantity: {item.quantity}
-                                    </div>
+                                    <div className="text-sm text-gray-500">Quantity: {item.quantity}</div>
                                     {item.variation_type_option_ids?.length > 0 && (
                                         <div className="text-sm text-gray-400">
                                             Variations: {item.variation_type_option_ids.join(", ")}
