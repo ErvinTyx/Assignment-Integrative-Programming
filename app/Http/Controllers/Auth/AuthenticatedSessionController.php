@@ -29,28 +29,53 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
+    // public function store(LoginRequest $request, CartService $cartService): \Symfony\Component\HttpFoundation\Response
+    // {
+    //     $request->authenticate();
+
+    //     $request->session()->regenerate();
+
+    //     /**
+    //      * @var \App\Models\User $user
+    //      */
+    //     $user = Auth::user();
+    //     $route = "/";
+    //     if ($user->hasAnyRole([RolesEnum::Admin, RolesEnum::Vendor])) {
+    //         $cartService->moveCartItemsToDatabase($user->id);
+    //         return Inertia::location('/admin');
+    //     } else {
+    //         $route = route('dashboard', absolute: false);
+    //     }
+
+    //     $cartService->moveCartItemsToDatabase($user->id);
+
+    //     return redirect()->intended($route);
+    // }
+
     public function store(LoginRequest $request, CartService $cartService): \Symfony\Component\HttpFoundation\Response
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        /**
-         * @var \App\Models\User $user
-         */
         $user = Auth::user();
-        $route = "/";
-        if ($user->hasAnyRole([RolesEnum::Admin, RolesEnum::Vendor])) {
-            $cartService->moveCartItemsToDatabase($user->id);
-            return Inertia::location('/admin');
-        } else {
-            $route = route('dashboard', absolute: false);
-        }
 
+        $redirectService = new \App\Services\LoginRedirectService();
+        $strategy = $redirectService->resolve($user);
+
+        // Move cart items (same as before)
         $cartService->moveCartItemsToDatabase($user->id);
 
+        $route = $strategy->redirect($user);
+
+        // Admin/Vendor still goes to /admin with Inertia::location
+        if ($route === '/admin') {
+            return \Inertia\Inertia::location($route);
+        }
+
+        // Everyone else: normal redirect
         return redirect()->intended($route);
     }
+
 
     /**
      * Destroy an authenticated session.
