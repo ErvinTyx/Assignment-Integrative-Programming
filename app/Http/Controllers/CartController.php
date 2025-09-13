@@ -154,7 +154,7 @@ class CartController extends Controller
 
                 foreach ($cartItems as $cartItem) {
                     try {
-                        $useApi = $request->query('use_api', true);
+                        $useApi = $request->query('use_api', false);
 
                         if ($useApi) {
                             // External API consumption (OrderItem Module REST API)

@@ -50,7 +50,7 @@ class OrderController extends Controller
             'user_id'           => 'required|integer|exists:users,id',
             'vendor_user_id'    => 'required|integer|exists:users,id',
             'total_price'       => 'required|numeric',
-            'status'            => 'required|string',
+            'status'            => 'nullable|string',
         ]);
 
         $order = Order::create($data);
