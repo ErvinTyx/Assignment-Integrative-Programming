@@ -72,10 +72,6 @@ Route::middleware('auth')->group(function () {
 Route::get('/order/{id}/proceed', [OrderController::class, 'proceed'])->name('order.proceed');
 Route::get('/order/{id}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
 
-// Route::prefix('api')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
-//     ->group(function () {
-//     Route::post('/orders', [OrderController::class, 'store'])->name('api.orders.store');
-//     Route::post('/order-items', [OrderItemController::class, 'store'])->name('api.order-items.store');
-// });
+
 
 require __DIR__ . '/auth.php';
