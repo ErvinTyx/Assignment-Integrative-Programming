@@ -81,7 +81,6 @@ class ProductApiController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create', Product::class);
 
         $data = $request->validate([
             'title'         => 'required|string|max:255',
@@ -128,7 +127,6 @@ class ProductApiController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
-            $this->authorize('update', $product);
 
             $data = $request->validate([
                 'title' => 'sometimes|required|string|max:255',
@@ -162,7 +160,6 @@ class ProductApiController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
-            $this->authorize('delete', $product);
             $product->delete();
 
             return response()->json([

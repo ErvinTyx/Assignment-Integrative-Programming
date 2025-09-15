@@ -55,7 +55,7 @@ class CartApiController extends Controller
 
         try {
             $cartService->addItemToCart(
-                $product-> $id ,
+                $product->id,
                 $data['quantity'],
                 $data['option_ids'] ?? [],
             );

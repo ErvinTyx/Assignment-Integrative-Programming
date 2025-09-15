@@ -7,12 +7,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\VendorController;
-use App\Http\Controllers\OrderItemController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginController;
 
 
-Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 // guest routes
 Route::get('/', [ProductController::class, 'home'])

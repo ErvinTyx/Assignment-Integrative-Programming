@@ -8,6 +8,7 @@ use App\Http\Resources\ProductListResource;
 use App\Models\Product;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -32,7 +33,7 @@ class VendorController extends Controller
                 $products = collect($response->json()['data'] ?? []);
             } else {
                 // Internal DB query
-                $products = \App\Models\Product::query()
+                $products = Product::query()
                     ->forWebsite()
                     ->where('created_by', $vendor->user_id)
                     ->get();

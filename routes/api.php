@@ -2,12 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderApiController;
-use App\Http\Controllers\OrderApiItemController;
 use App\Http\Controllers\ProductApiController;
 use App\Http\Controllers\CartApiController;
 use App\Http\Controllers\VendorApiController;
 use App\Http\Controllers\ProfileApiController;
 use App\Http\Controllers\StripeApiController;
+use App\Http\Controllers\AuthApiController;
 
 
 //vendor api
@@ -69,7 +69,7 @@ Route::post('/webhook', [StripeApiController::class, 'webhook']);
 Route::post('/connect', [StripeApiController::class, 'connect']);
 Route::post('/payout/{vendorId}', [StripeApiController::class, 'payout']);
 
-use App\Http\Controllers\AuthApiController;
+
 
 Route::post('/login', [AuthApiController::class, 'login']);
 Route::post('/logout', [AuthApiController::class, 'logout'])->middleware('auth:sanctum');
