@@ -21,10 +21,9 @@ Route::prefix('vendors')->group(function () {
 
 //cart api
 Route::get('/cart', [CartApiController::class, 'index'])->name('api.cart.index');
-Route::post('/cart', [CartApiController::class, 'store'])->name('api.cart.store');
-Route::put('/cart/{cartItem}', [CartApiController::class, 'update'])->name('api.cart.update');
-Route::delete('/cart/{cartItem}', [CartApiController::class, 'destroy'])->name('api.cart.destroy');
-Route::post('/cart/remove-purchased', [CartApiController::class, 'removePurchased'])->name('api.cart.remove-purchased');
+Route::post('/cart/{product}', [CartApiController::class, 'store'])->name('api.cart.store');
+Route::put('/cart/{product}', [CartApiController::class, 'update'])->name('api.cart.update');
+Route::delete('/cart/{product}', [CartApiController::class, 'destroy'])->name('api.cart.destroy');
 
 
 //product api
@@ -42,14 +41,7 @@ Route::get('/orders/{id}', [OrderApiController::class, 'show'])->name('api.order
 Route::post('/orders', [OrderApiController::class, 'store'])->name('api.orders.store');
 Route::put('/orders/{id}', [OrderApiController::class, 'update'])->name('api.orders.update');
 Route::delete('/orders/{id}', [OrderApiController::class, 'destroy'])->name('api.orders.destroy');
-Route::post('/orders/{id}/fail', [OrderApiController::class, 'fail'])->name('orders.fail');
-
-//order item api
-Route::get('/order-items', [OrderItemApiController::class, 'index'])->name('api.order-items.index');
-Route::get('/order-items/{id}', [OrderItemApiController::class, 'show'])->name('api.order-items.show');
-Route::post('/order-items', [OrderItemApiController::class, 'store'])->name('api.order-items.store');
-Route::put('/order-items/{id}', [OrderItemApiController::class, 'update'])->name('api.order-items.update');
-Route::delete('/order-items/{id}', [OrderItemApiController::class, 'destroy'])->name('api.order-items.destroy');
+Route::put('/orders/{id}/fail', [OrderApiController::class, 'fail'])->name('orders.fail');
 
 
 Route::get('/profile', [ProfileApiController::class, 'show'])->name('api.profile.show');
