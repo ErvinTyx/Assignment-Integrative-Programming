@@ -11,7 +11,6 @@ class OrderApiController extends Controller
 {
     /**
      * List all orders or filter by user/vendor
-     * GET /api/orders?user_id=1&vendor_user_id=2
      */
     public function index(Request $request)
     {
@@ -35,7 +34,6 @@ class OrderApiController extends Controller
 
     /**
      * Get a single order
-     * GET /api/orders/{id}
      */
     public function show($id)
     {
@@ -55,7 +53,6 @@ class OrderApiController extends Controller
 
     /**
      * Create a new order
-     * POST /api/orders
      */
     public function store(Request $request)
     {
@@ -77,7 +74,6 @@ class OrderApiController extends Controller
 
     /**
      * Update an existing order
-     * PUT /api/orders/{id}
      */
     public function update(Request $request, $id)
     {
@@ -106,7 +102,6 @@ class OrderApiController extends Controller
 
     /**
      * Delete an order
-     * DELETE /api/orders/{id}
      */
     public function destroy($id)
     {
@@ -117,6 +112,30 @@ class OrderApiController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Order deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ], 404);
+        }
+    }
+
+    /**
+     * Mark order as failed when user cancels payment
+     * POST /api/orders/{id}/fail
+     */
+    public function fail($id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+
+            $order->update(['status' => 'failed']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order marked as failed',
+                'data' => $order
             ]);
         } catch (\Exception $e) {
             return response()->json([
