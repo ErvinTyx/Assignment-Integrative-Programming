@@ -7,6 +7,8 @@ use App\Http\Controllers\ProductApiController;
 use App\Http\Controllers\CartApiController;
 use App\Http\Controllers\VendorApiController;
 use App\Http\Controllers\ProfileApiController;
+use App\Http\Controllers\StripeApiController;
+
 
 //vendor api
 Route::prefix('vendors')->group(function () {
@@ -53,6 +55,7 @@ Route::get('/orders/{id}', [OrderApiController::class, 'show'])->name('api.order
 Route::post('/orders', [OrderApiController::class, 'store'])->name('api.orders.store');
 Route::put('/orders/{id}', [OrderApiController::class, 'update'])->name('api.orders.update');
 Route::delete('/orders/{id}', [OrderApiController::class, 'destroy'])->name('api.orders.destroy');
+Route::post('/orders/{id}/fail', [OrderApiController::class, 'fail'])->name('orders.fail');
 
 //order item api
 Route::get('/order-items', [OrderItemApiController::class, 'index'])->name('api.order-items.index');
@@ -66,3 +69,9 @@ Route::get('/profile', [ProfileApiController::class, 'show'])->name('api.profile
 Route::put('/profile', [ProfileApiController::class, 'update'])->name('api.profile.update');
 Route::delete('/profile', [ProfileApiController::class, 'destroy'])->name('api.profile.destroy');
 
+
+Route::post('/success', [StripeApiController::class, 'success']);
+Route::post('/failure', [StripeApiController::class, 'failure']);
+Route::post('/webhook', [StripeApiController::class, 'webhook']);
+Route::post('/connect', [StripeApiController::class, 'connect']);
+Route::post('/payout/{vendorId}', [StripeApiController::class, 'payout']);

@@ -152,36 +152,18 @@ class CartController extends Controller
 
                 $orders[] = $order;
 
+                $orders[] = $order;
+
                 foreach ($cartItems as $cartItem) {
                     try {
-                        $useApi = $request->query('use_api', false);
-
-                        if ($useApi) {
-                            // External API consumption (OrderItem Module REST API)
-                            $response = Http::timeout(10)->post(route('api.order-items.store'), [
-                                'order_id'                  => $order['id'], // careful: $order may be array if API
-                                'product_id'                => $cartItem['product_id'],
-                                'quantity'                  => $cartItem['quantity'],
-                                'price'                     => $cartItem['price'],
-                                'variation_type_option_ids' => $cartItem['option_ids'],
-                            ]);
-
-                            if ($response->failed()) {
-                                throw new \Exception('Failed to create order item via API');
-                            }
-
-                            $orderItem = $response->json();
-
-                        } else {
-                            // Internal DB call (same module)
-                            $orderItem = OrderItem::create([
-                                'order_id'                  => is_array($order) ? $order['id'] : $order->id,
-                                'product_id'                => $cartItem['product_id'],
-                                'quantity'                  => $cartItem['quantity'],
-                                'price'                     => $cartItem['price'],
-                                'variation_type_option_ids' => $cartItem['option_ids'],
-                            ]);
-                        }
+                        // Always use internal DB call
+                        $orderItem = OrderItem::create([
+                            'order_id'                  => is_array($order) ? $order['id'] : $order->id,
+                            'product_id'                => $cartItem['product_id'],
+                            'quantity'                  => $cartItem['quantity'],
+                            'price'                     => $cartItem['price'],
+                            'variation_type_option_ids' => $cartItem['option_ids'],
+                        ]);
 
                     } catch (\Exception $e) {
                         return response()->json([
@@ -220,7 +202,7 @@ class CartController extends Controller
                 'line_items' => $lineItems,
                 'mode' => 'payment',
                 'success_url' => route('stripe.success', []) . "?session_id={CHECKOUT_SESSION_ID}",
-                'cancel_url' => route('stripe.failure', []),
+                'cancel_url' => route('stripe.failure', []) ."?session_id={CHECKOUT_SESSION_ID}",
             ]);
 
             foreach ($orders as $order) {
