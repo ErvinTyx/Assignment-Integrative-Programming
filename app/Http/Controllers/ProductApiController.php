@@ -41,7 +41,7 @@ class ProductApiController extends Controller
      * Get product details by ID
      * GET /api/products/{id}
      */
-    public function show($id)
+    /*public function show($id)
     {
         try {
             $product = Product::with(['variations', 'category'])->findOrFail($id);
@@ -57,7 +57,22 @@ class ProductApiController extends Controller
                 'data' => null
             ], 404);
         }
+    }*/
+    public function show($id)
+    {
+        try {
+            $product = Product::query()
+                ->forWebsite()                 // published + vendorApproved()
+                ->with(['variations', 'category'])
+                ->select('products.*')         // because VendorApproved() uses a join
+                ->findOrFail($id);
+
+            return response()->json(['success' => true, 'data' => $product]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Product not found', 'data' => null], 404);
+        }
     }
+
 
     /**
      * Create a new product
@@ -65,15 +80,18 @@ class ProductApiController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', \App\Models\Product::class);
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'quantity' => 'nullable|integer|min:0',
-            'created_by' => 'required|exists:users,id',
             'category_id' => 'nullable|exists:categories,id',
+            // DO NOT accept created_by from client
         ]);
 
+        $data['created_by'] = $request->user()->id;  // set on server
         $product = Product::create($data);
 
         return response()->json([
@@ -91,6 +109,7 @@ class ProductApiController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
+            $this->authorize('update', $product);
 
             $data = $request->validate([
                 'title' => 'sometimes|required|string|max:255',
@@ -124,6 +143,7 @@ class ProductApiController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
+            $this->authorize('delete', $product);
             $product->delete();
 
             return response()->json([

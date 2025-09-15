@@ -27,4 +27,5 @@ class AppServiceProvider extends ServiceProvider
         Schedule::command('payout:vendor')->monthlyOn(1, '00:00')->withoutOverlapping();
         Vite::prefetch(concurrency: 3);
     }
+
 }

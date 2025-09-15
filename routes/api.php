@@ -26,12 +26,25 @@ Route::post('/cart/remove-purchased', [CartApiController::class, 'removePurchase
 
 
 //product api
-Route::get('/products', [ProductApiController::class, 'index'])->name('api.products.index');
+/*Route::get('/products', [ProductApiController::class, 'index'])->name('api.products.index');
 Route::get('/products/{id}', [ProductApiController::class, 'show'])->name('api.products.show');
 Route::post('/products', [ProductApiController::class, 'store'])->name('api.products.store');
 Route::put('/products/{id}', [ProductApiController::class, 'update'])->name('api.products.update');
 Route::delete('/products/{id}', [ProductApiController::class, 'destroy'])->name('api.products.destroy');
-Route::get('/products-by-vendor', [ProductApiController::class, 'index'])->name('api.products.by-vendor');
+Route::get('/products-by-vendor', [ProductApiController::class, 'index'])->name('api.products.by-vendor');*/
+
+// Public reads
+Route::get('/products', [ProductApiController::class, 'index']);
+Route::get('/products/{id}', [ProductApiController::class, 'show']);
+
+// Mutations require auth
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/products',  [ProductApiController::class, 'store']);
+    Route::put('/products/{id}', [ProductApiController::class, 'update']);
+    Route::delete('/products/{id}', [ProductApiController::class, 'destroy']);
+});
+
+
 
 
 //orderapi

@@ -16,6 +16,11 @@ class Product extends Model implements HasMedia
 {
     //
     use InteractsWithMedia;
+
+    protected $fillable = [
+        'title', 'description', 'price', 'quantity', 'category_id', 'department_id', 'slug'
+    ];
+
     public function department()
     {
         return $this->belongsTo(Department::class);
@@ -25,7 +30,7 @@ class Product extends Model implements HasMedia
     {
         return $this->belongsTo(Category::class);
     }
-
+    
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')
