@@ -9,11 +9,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use SimonHamp\LaravelStripeConnect\Traits\Payable;
 use Spatie\Permission\Traits\HasRoles;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles,Payable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles,Payable;
 
     /**
      * The attributes that are mass assignable.

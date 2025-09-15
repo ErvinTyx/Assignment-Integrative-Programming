@@ -11,13 +11,11 @@ use App\Http\Controllers\StripeApiController;
 
 
 //vendor api
-Route::prefix('vendors')->group(function () {
-    Route::get('/', [VendorApiController::class, 'index'])->name('api.vendors.index');
-    Route::get('/{vendor}', [VendorApiController::class, 'show'])->name('api.vendors.show');
-    Route::post('/', [VendorApiController::class, 'store'])->name('api.vendors.store');
-    Route::put('/{vendor}', [VendorApiController::class, 'update'])->name('api.vendors.update');
-    Route::delete('/{vendor}', [VendorApiController::class, 'destroy'])->name('api.vendors.destroy');
-});
+Route::get('/vendor', [VendorApiController::class, 'index'])->name('api.vendors.index');
+Route::get('/vendor/{vendor}', [VendorApiController::class, 'show'])->name('api.vendors.show');
+Route::post('/vendor', [VendorApiController::class, 'store'])->name('api.vendors.store');
+Route::put('/vendor/{vendor}', [VendorApiController::class, 'update'])->name('api.vendors.update');
+Route::delete('/vendor/{vendor}', [VendorApiController::class, 'destroy'])->name('api.vendors.destroy');
 
 //cart api
 Route::get('/cart', [CartApiController::class, 'index'])->name('api.cart.index');
@@ -44,9 +42,12 @@ Route::delete('/orders/{id}', [OrderApiController::class, 'destroy'])->name('api
 Route::put('/orders/{id}/fail', [OrderApiController::class, 'fail'])->name('orders.fail');
 
 
-Route::get('/profile', [ProfileApiController::class, 'show'])->name('api.profile.show');
-Route::put('/profile', [ProfileApiController::class, 'update'])->name('api.profile.update');
-Route::delete('/profile', [ProfileApiController::class, 'destroy'])->name('api.profile.destroy');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileApiController::class, 'show']);
+    Route::put('/profile', [ProfileApiController::class, 'update']);
+    Route::delete('/profile', [ProfileApiController::class, 'destroy']);
+});
+
 
 
 Route::post('/success', [StripeApiController::class, 'success']);
@@ -54,3 +55,9 @@ Route::post('/failure', [StripeApiController::class, 'failure']);
 Route::post('/webhook', [StripeApiController::class, 'webhook']);
 Route::post('/connect', [StripeApiController::class, 'connect']);
 Route::post('/payout/{vendorId}', [StripeApiController::class, 'payout']);
+
+use App\Http\Controllers\AuthApiController;
+
+Route::post('/login', [AuthApiController::class, 'login']);
+Route::post('/logout', [AuthApiController::class, 'logout'])->middleware('auth:sanctum');
+

@@ -33,26 +33,26 @@ class CartController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-   // app/Http/Controllers/Api/CartApiController.php (store)
     public function store(Request $request, Product $product, CartService $cartService)
     {
-        $request->mergeIfMissing(['quantity' => 1]);
+        $request->mergeIfMissing([
+            'quantity' => 1
+        ]);
 
         $data = $request->validate([
             'option_ids' => ['nullable', 'array'],
             'quantity' => ['required', 'integer', 'min:1'],
+
         ]);
 
-        // Pass product id (int) — not the whole model
         $cartService->addItemToCart(
-            $product->id,
+            $product,
             $data['quantity'],
-            $data['option_ids'] ?? []
+            $data['option_ids'] ?: [],
         );
 
-        return response()->json(['success' => true, 'message' => 'Product added to cart'], 201);
+        return back()->with('success', 'Product added to cart successfully!');
     }
-
 
 
 
@@ -171,6 +171,7 @@ class CartController extends Controller
                             'message' => $e->getMessage(),
                         ], 500);
                     }
+
 
                     $description = collect($cartItem['options'])->map(function ($item) {
                         return "{$item['type']['name']}: {$item['name']}";
