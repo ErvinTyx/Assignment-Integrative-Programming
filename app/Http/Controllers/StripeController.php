@@ -139,6 +139,7 @@ class StripeController extends Controller
                     ->get();
 
                 $productToDeletedFromCart = [];
+
                 foreach ($orders as $order) {
                     $order->payment_intent = $pi;
                     $order->status = OrderStatusEnum::Paid;
@@ -153,6 +154,7 @@ class StripeController extends Controller
                     foreach ($order->orderItems as $orderItem) {
                         $options = $orderItem->variation_type_option_ids;
                         $product = $orderItem->product;
+
                         if ($options) {
                             $normalizedOptions = json_encode(array_values($options));
                             $variation = $product->variations()
@@ -167,15 +169,30 @@ class StripeController extends Controller
                             $product->quantity -= $orderItem->quantity;
                             $product->save();
                         }
-
                     }
 
-                    CartItem::query()
-                        ->where('user_id', $order->user_id)
-                        ->whereIn('product_id', $productToDeletedFromCart)
-                        ->where('saved_for_later', false)
-                        ->delete();
+                    // Remove items from cart (internal/external API pattern)
+                    $useApi = $request->query('use_api', false);
+
+                    if ($useApi) {
+                        // Call external API
+                        $response = Http::timeout(10)->post(route('api.cart.remove-purchased'), [
+                            'user_id' => $order->user_id,
+                            'product_ids' => $productToDeletedFromCart,
+                        ]);
+
+                        if ($response->failed()) {
+                            \Log::error('Failed to remove purchased items from cart via API');
+                        }
+                    } else {
+                        // Internal DB deletion
+                        CartItem::where('user_id', $order->user_id)
+                            ->whereIn('product_id', $productToDeletedFromCart)
+                            ->where('saved_for_later', false)
+                            ->delete();
+                    }
                 }
+                
                 break;
             default:
                 echo 'Received unknown event type ' . $event->type;

@@ -13,12 +13,37 @@ use Inertia\Inertia;
 
 class VendorController extends Controller
 {
-    public function profile(Vendor $vendor)
+    public function profile(Request $request, Vendor $vendor)
     {
-        $products = Product::query()
-            ->forWebsite()
-            ->where('created_by', $vendor->user_id)
-            ->paginate();
+        $useApi = $request->query('use_api', false);
+        $products = [];
+
+        try {
+            if ($useApi) {
+                // External API consumption (Product Module REST API)
+                $response = Http::timeout(10)->get(route('api.products.by-vendor', [
+                    'vendor_id' => $vendor->user_id,
+                ]));
+
+                if ($response->failed()) {
+                    throw new \Exception('Failed to fetch products via API');
+                }
+
+                $products = collect($response->json()['data'] ?? []);
+            } else {
+                // Internal DB query
+                $products = \App\Models\Product::query()
+                    ->forWebsite()
+                    ->where('created_by', $vendor->user_id)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            return Inertia::render('Vendor/Profile', [
+                'vendor' => $vendor,
+                'products' => collect([]),
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return Inertia::render('Vendor/Profile', [
             'vendor' => $vendor,
