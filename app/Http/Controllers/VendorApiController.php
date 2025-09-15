@@ -12,7 +12,7 @@ class VendorApiController extends Controller
      */
     public function index()
     {
-        $vendors = Vendor::all(['id', 'user_id', 'store_name', 'store_address', 'status']);
+        $vendors = Vendor::all(['user_id', 'store_name', 'store_address', 'status']);
         return response()->json($vendors);
     }
 

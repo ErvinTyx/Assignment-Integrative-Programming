@@ -2,115 +2,140 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CartItem;
+use App\Enums\OrderStatusEnum;
+use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
+use App\Service\CartService;
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Stripe\Checkout\Session;
+use Stripe\Stripe;
 
 class CartApiController extends Controller
 {
     /**
-     * List all cart items for a user
-     * GET /api/cart
+     * Display cart grouped items (JSON).
      */
-    public function index(Request $request)
+    public function index(Request $request, CartService $cartService)
     {
-        $userId = $request->query('user_id') ?? Auth::id();
+        try {
+            $grouped = $cartService->getCartItemsGrouped();
 
-        $cartItems = CartItem::with('product')
-            ->where('user_id', $userId)
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $cartItems,
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $grouped,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Cart index error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch cart items',
+            ], 500);
+        }
     }
 
     /**
-     * Add item to cart
-     * POST /api/cart
+     * Add a product to cart.
      */
-    public function store(Request $request)
+    public function store(Request $request, Product $product, CartService $cartService)
+    {
+        $request->mergeIfMissing([
+            'quantity' => 1,
+        ]);
+
+        $data = $request->validate([
+            'option_ids' => ['nullable', 'array'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        try {
+            $cartService->addItemToCart(
+                $product-> $id ,
+                $data['quantity'],
+                $data['option_ids'] ?? [],
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart successfully',
+            ], 201);
+        } catch (Exception $e) {
+            Log::error('Cart add error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to add product to cart',
+            ], 500);
+        }
+    }
+
+    /**
+     * Update cart item quantity or options.
+     */
+    public function update(Request $request, Product $product, CartService $cartService)
     {
         $request->validate([
-            'user_id' => 'required|integer',
-            'product_id' => 'required|integer|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'option_ids' => 'nullable|array',
-            'saved_for_later' => 'nullable|boolean',
+            'quantity' => ['nullable', 'integer', 'min:1'],
+            'option_ids' => ['nullable', 'array'],
         ]);
 
-        $cartItem = CartItem::updateOrCreate(
-            [
-                'user_id' => $request->user_id,
-                'product_id' => $request->product_id,
-                'variation_type_option_ids' => $request->option_ids ?? [],
-            ],
-            [
-                'quantity' => $request->quantity,
-                'saved_for_later' => $request->saved_for_later ?? false,
-            ]
-        );
+        $optionIds = $request->input('option_ids', []);
+        $quantity = $request->input('quantity');
 
-        return response()->json([
-            'success' => true,
-            'data' => $cartItem,
-        ], 201);
+        try {
+            $cartService->updateItemQuantity(
+                $product->id,
+                $quantity,
+                $optionIds
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart item updated',
+            ]);
+        } catch (Exception $e) {
+            Log::error('Cart update error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to update cart item',
+            ], 500);
+        }
     }
 
     /**
-     * Update quantity or saved_for_later status
-     * PUT /api/cart/{cartItem}
+     * Remove cart item.
      */
-    public function update(Request $request, CartItem $cartItem)
+    public function destroy(Request $request, Product $product, CartService $cartService)
     {
-        $request->validate([
-            'quantity' => 'sometimes|integer|min:1',
-            'saved_for_later' => 'sometimes|boolean',
-        ]);
+        $optionIds = $request->input('option_ids', []);
 
-        $cartItem->update($request->only(['quantity', 'saved_for_later']));
+        try {
+            $cartService->removeItemFromCart($product->id, $optionIds);
 
-        return response()->json([
-            'success' => true,
-            'data' => $cartItem,
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Product removed from cart',
+            ]);
+        } catch (Exception $e) {
+            Log::error('Cart destroy error: '.$e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to remove product from cart',
+            ], 500);
+        }
     }
 
     /**
-     * Remove an item from cart
-     * DELETE /api/cart/{cartItem}
+     * Checkout the cart. Creates orders (grouped by vendor) and Stripe session.
+     *
+     * Query params:
+     *  - vendor_id (optional) : only checkout items from specific vendor
+     *  - use_api (optional) : if true, tries to call external Order API (keeps parity with your web controller)
+     *
+     * Returns JSON with Stripe session url on success.
      */
-    public function destroy(CartItem $cartItem)
-    {
-        $cartItem->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cart item removed',
-        ]);
-    }
-
-    /**
-     * Remove purchased products from cart
-     * POST /api/cart/remove-purchased
-     */
-    public function removePurchased(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|integer',
-            'product_ids' => 'required|array',
-        ]);
-
-        CartItem::where('user_id', $request->user_id)
-            ->whereIn('product_id', $request->product_ids)
-            ->where('saved_for_later', false)
-            ->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Purchased products removed from cart.'
-        ]);
-    }
 }

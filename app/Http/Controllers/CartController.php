@@ -172,6 +172,7 @@ class CartController extends Controller
                         ], 500);
                     }
 
+
                     $description = collect($cartItem['options'])->map(function ($item) {
                         return "{$item['type']['name']}: {$item['name']}";
                     })->implode(', ');

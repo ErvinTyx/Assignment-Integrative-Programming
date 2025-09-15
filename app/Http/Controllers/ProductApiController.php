@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
 
+namespace App\Http\Controllers;
+use Illuminate\Support\Str;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -80,18 +81,36 @@ class ProductApiController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('create', \App\Models\Product::class);
+        $this->authorize('create', Product::class);
 
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'nullable|integer|min:0',
-            'category_id' => 'nullable|exists:categories,id',
-            // DO NOT accept created_by from client
+            'title'         => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'department_id' => 'required|integer|exists:departments,id',
+            'category_id'   => 'required|integer|exists:categories,id',
+            'price'         => 'required|numeric|min:0',
+            'status'        => 'required|string|in:draft,publish', // adjust to your allowed values
+            'quantity'      => 'nullable|integer|min:0',
+            'created_by'    => 'required|integer|exists:users,id',
+            'updated_by'    => 'nullable|integer|exists:users,id',
+            'slug'          => 'nullable|string|max:255|unique:products,slug',
         ]);
 
-        $data['created_by'] = $request->user()->id;  // set on server
+        // Ensure updated_by exists — if not provided, set same as created_by
+        if (empty($data['updated_by'])) {
+            $data['updated_by'] = $data['created_by'];
+        }
+
+        // Auto-generate slug if not provided
+        if (empty($data['slug'])) {
+            $base = Str::slug($data['title']);
+            // append random to avoid collisions
+            $data['slug'] = $base . '-' . Str::random(6);
+            // optional: ensure uniqueness - loop until unique
+            while (Product::where('slug', $data['slug'])->exists()) {
+                $data['slug'] = $base . '-' . Str::random(6);
+            }
+        }
         $product = Product::create($data);
 
         return response()->json([
