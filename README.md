@@ -26,6 +26,7 @@ Follow the installation and configuration steps below to set up the development 
   7. [Database Setup](#7-database-setup)
   8. [Mailpit](#8-mailpit)
   9. [Stripe](#9-stripe)
+  10. [Default User Credentials](#10-default-user-credentials)
 - [Running the Project](#running-the-project)
 
 ---
@@ -206,7 +207,32 @@ Example output:
 Your pairing code is: enjoy-enough-outwit-win
 Press Enter to open the browser or visit https://dashboard.stripe.com/stripecli/confirm_auth
 ```
+---
+### 10. Default User Credentials
 
+
+## Default User Credentials
+
+Once you’ve set up the application and seeded the database, you can log in with the following default user credentials:
+
+### Users:
+
+* **User**
+
+  * Email: `user@example.com`
+  * Password: `password`
+
+* **Vendor**
+
+  * Email: `vendor@example.com`
+  * Password: `password`
+
+* **Admin**
+
+  * Email: `admin@example.com`
+  * Password: `password`
+
+These credentials can be used to test different user roles and functionalities within the application. Make sure to change the passwords and details in a production environment.
 ---
 
 ## Running the Project
